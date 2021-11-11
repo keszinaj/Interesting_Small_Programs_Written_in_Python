@@ -1,6 +1,6 @@
 # made by keszinaj
 '''
-    It's simple sudoku solver.
+    It's a simple sudoku solver.
 '''
 import math
 from testy import sudoku_input_hard, sudoku_input_wrong, invalidBoard
