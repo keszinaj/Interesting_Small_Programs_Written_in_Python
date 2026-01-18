@@ -1,10 +1,11 @@
+# TODO: kod dziala ale trzeba go posprzatac i dodac komentarze
 # define full secret
 secret="alamakota"
 secret_as_numer=''.join(str(x) for x in list(map(lambda x: ord(x), list(secret))))
 
 #define minimal number of shared secrets nessesary to put
 
-m=8
+m=2
 
 # stopien wielomianu polynomial
 degree = m-1
@@ -28,7 +29,7 @@ a = random_polynomial(degree)
 print(a)
 
 def calculate_random_point_in_polynomial(list_of_A, k):
-    x=random.randint(1,10000)
+    x=random.randint(1, 10000)
     y=0
     for i in range(k+1):
         y+=pow(x,i)*list_of_A[i]
@@ -103,22 +104,14 @@ def lagrange_polynomial(x_arr, y_arr):
     arr = [[0.0 for _ in range(number_of_points)] for _ in range(number_of_points)]
     # Wypełnij pierwszą kolumnę wartościami y
     for i in range(number_of_points):
-        arr[i][i] = y_arr[i]
-    #print(arr)
-    # wypelniamy nastepne skosy
+        arr[i][0] = y_arr[i]
+    # Wypełnij pozostałe kolumny różnicami dzielonymi
     for j in range(1, number_of_points):
-        for i in range(number_of_points-1):
-            #print("i:", i, "j:", j)
-            numerator = arr[i+1][j]-arr[i][j-1]
-            denominator = x_arr[j] - x_arr[i]
-            sol= numerator/denominator
-            #print("numerator",numerator, "denominator:",denominator)
-            arr[i][j]=sol
-            j+=1
-            if j==len(x_arr):
-                break
-    #print(arr)
-    # bo tam tylko sa wyniki zobacz na screenshocie
+        for i in range(number_of_points - j):
+            numerator = arr[i+1][j-1] - arr[i][j-1]
+            denominator = x_arr[i+j] - x_arr[i]
+            arr[i][j] = numerator / denominator
+    # Zwróć współczynniki postaci Newtona
     return arr[0]
 
    
@@ -130,11 +123,12 @@ def lagrange_polynomial(x_arr, y_arr):
 
 
 # test wszystkiego razem
+# okej to dobrze dziala dla wielomianow stopnia 1, 2, 3 dla 4 juz sie psuje
 ta = lagrange_polynomial(xxx, yyy)
 print(determining_an(ta, xxx))
 
-#ta= lagrange_polynomial([1,2,3], [4,5,1])
-#print(determining_an(ta, [1,2,3])) # powinno dać [-2.0, 8.5, -2.5]
 
-#ta= lagrange_polynomial([0,1,2,3], [-1,-1,5,11])
-#print(determining_an(ta, [-1,0,2,3]))
+# Math thoughts
+# czy to ma znaczenie ze moje wspolczynniki sa zawsze liczbami calkowitymi? czy 
+# przez to atakujacy moze latwiej odzyskac sekret?
+# przy losowaniu x i y to ze sa one zawsze calkowite nie ma znaczenia
