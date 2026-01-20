@@ -5,6 +5,9 @@
 # python...
 # we also need to mimic the operation in 32 bit space
 # chacha20 is using rotate left(NOT shift left) and adding
+from importlib.resources import path
+
+
 MASK32 = 0xffffffff
 def add32(a, b):
     return (a + b) & MASK32
@@ -18,6 +21,7 @@ def chacha20_one_operation_abcd(a,b,c,d):
     c = add32(c, d); b ^= c; b = rotl32(b,  7)
     return a, b, c, d
 #test vector
+'''
 a = 0x11111111
 b = 0x01020304
 c = 0x9b8d6f43
@@ -25,6 +29,8 @@ d = 0x01234567
 for x in chacha20_one_operation_abcd(a,b,c,d):
     print(hex(x))
 print("----")
+'''
+
 #it should return:
 #a = 0xea2a92f4
 #b = 0xcb1cf8ce
@@ -60,7 +66,7 @@ def chacha20_diagonal_operations(matrix):
         matrix[2][(2+i)%4] = c
         matrix[3][(3+i)%4] = d
         
-def chacha20(initial_state_matrix):
+def chacha20_keystream_chunk(initial_state_matrix):
     #jak mnie python zrobil
     #matrix = initial_state_matrix.copy()
     matrix = [row[:] for row in initial_state_matrix]
@@ -77,18 +83,21 @@ def chacha20(initial_state_matrix):
         for word in row:
             print(hex(word), end=' ')
         print() 
-    for row in initial_state_matrix:
-        for word in row:
-            print(hex(word), end=' ')
-        print()
-    print(add32(matrix[0][0], initial_state_matrix[0][0]))
     for i in range(4):
         for j in range(4):
             matrix[i][j] = add32(matrix[i][j], initial_state_matrix[i][j])
-    
-    #flat_state = [matrix[r][c] for r in range(4) for c in range(4)]
-    #keystream_block = b''.join(w.to_bytes(4, 'little') for w in flat_state)  
-    return 
+    for row in matrix:
+        for word in row:
+            print(hex(word), end=' ')
+        print()
+    keystream = b"".join( word.to_bytes(4, "little")
+                         for row in matrix
+                         for word in row)
+    print("Keystream block:")
+    print(keystream.hex())
+    print(len(keystream))
+      
+    return keystream
 '''
 key has to be 32 bytes long == 32 letters, it has to be in string format
 nonce has to be 12 bytes long == 12 letters, it has to be in string format
@@ -134,6 +143,7 @@ def create_matrix(key,nonce,counter):
     print(hex(f_counter))
     print("Initial matrix:")
     print(initial_matrix)
+    return initial_matrix
 
 def test_matrix_from_RFC():
     initial_matrix = [[0 for _ in range(4)] for _ in range(4)]
@@ -167,7 +177,7 @@ def test_matrix_from_RFC():
     #    print(hex(i))
 
 mmm = test_matrix_from_RFC()
-chacha20(mmm)
+chacha20_keystream_chunk(mmm)
 '''dobrze wychodzi
    ChaCha state after 20 rounds
 
@@ -184,5 +194,31 @@ chacha20(mmm)
        d19c12b5  b94e16de  e883d0cb  4e3c50a2
 
 '''
-#create_matrix('12345678912345678912345678912312',"alaiolamakot",1) 
 
+
+
+
+def chacha20_encrypt(plaintext_bytes, key, nonce):
+    data_length = len(plaintext_bytes)
+    print()
+    chunk_size = 64
+    num_of_chunks = (data_length + 63) // 64 
+    chunks = [ plaintext_bytes[i:i+chunk_size] for i in range(0, num_of_chunks*chunk_size, chunk_size)]
+    cipertext = b""
+    for i in range(num_of_chunks):
+        keystream = chacha20_keystream_chunk(create_matrix(key, nonce, i+1))
+        cipertext_chunk = bytes(b ^ k for b, k in zip(chunks[i], keystream)) # we can't xor on bytes, it will create pair of bytes and xor on it(xor on two numbers)
+        cipertext += cipertext_chunk
+    return cipertext
+
+def chacha20_decrypt(cipertext_bytes, key, nonce):
+    return chacha20_encrypt(cipertext_bytes, key, nonce) # symmetric cipher
+
+
+with open("./test.txt", "rb") as f:
+    plaintext_bytes = f.read()
+    cipertext = chacha20_encrypt(plaintext_bytes, '12345678912345678912345678912312',"alaiolamakot")
+    with open("./test.enc", "wb") as f:
+      f.write(cipertext)
+    decrypted = chacha20_decrypt(cipertext, '12345678912345678912345678912312',"alaiolamakot")
+    print(decrypted)
