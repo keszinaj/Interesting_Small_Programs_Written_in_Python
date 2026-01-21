@@ -1,3 +1,4 @@
+import hashlib
 # TODO: kod dziala ale trzeba go posprzatac i dodac komentarze
 # define full secret
 secret="alamakota"
@@ -25,8 +26,8 @@ def random_polynomial(k):
     print(list_of_A)
     return list_of_A
 
-a = random_polynomial(degree)
-print(a)
+#a = random_polynomial(degree)
+#print(a)
 
 def calculate_random_point_in_polynomial(list_of_A, k):
     x=random.randint(1, 10000)
@@ -34,15 +35,15 @@ def calculate_random_point_in_polynomial(list_of_A, k):
     for i in range(k+1):
         y+=pow(x,i)*list_of_A[i]
     return (x,y)
-xxx = []
-yyy = []
-for _ in range(degree+1):
-    point = calculate_random_point_in_polynomial(a, degree)
-    xxx.append(point[0])
-    yyy.append(point[1])
-    print("Point:", point)
-print("x:", xxx)
-print("y:", yyy)
+#xxx = []
+#yyy = []
+#for _ in range(degree+1):
+#    point = calculate_random_point_in_polynomial(a, degree)
+#    xxx.append(point[0])
+#    yyy.append(point[1])
+#    print("Point:", point)
+#print("x:", xxx)
+#print("y:", yyy)
 
 
 # zastanawialem sie jak pomnozyc dwa wielomiany
@@ -124,6 +125,24 @@ def lagrange_polynomial(x_arr, y_arr):
 
 # test wszystkiego razem
 # okej to dobrze dziala dla wielomianow stopnia 1, 2, 3 dla 4 juz sie psuje
+a = random_polynomial(degree)
+secret_key = "".join(str(i) for i in a)
+#to meke it 32 bytes as chacha20 require
+res = hashlib.md5(secret_key.encode())
+secret_key=res.hexdigest()
+
+print(secret_key)
+print(len(secret_key))  # 32
+xxx = []
+yyy = []
+for _ in range(degree+1):
+    point = calculate_random_point_in_polynomial(a, degree)
+    xxx.append(point[0])
+    yyy.append(point[1])
+    print("Point:", point)
+
+
+
 ta = lagrange_polynomial(xxx, yyy)
 print(determining_an(ta, xxx))
 
