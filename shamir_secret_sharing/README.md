@@ -4,3 +4,17 @@ If we have n points(x_1,x_2, x_3, x_4, x_5, ..., x_n) and coresponding values(y_
 To calculate that we can use Lagrange interpolation.
 Lagrange interpolation has always only one clear sollution. 
 
+
+
+How the key will look like
+n|common|secret
+n - degree of polynomial
+
+
+
+
+
+
+Problems not solved: 
+Key distribution showing every key is not good. Maybe we will show it one by one, yes, one by one would be good option
+
