@@ -6,7 +6,7 @@
 # we also need to mimic the operation in 32 bit space
 # chacha20 is using rotate left(NOT shift left) and adding
 from importlib.resources import path
-
+import os
 
 MASK32 = 0xffffffff
 def add32(a, b):
@@ -124,9 +124,10 @@ def create_matrix(key,nonce,counter):
     initial_matrix[1] = key_in_blocks[0:4].copy()
     initial_matrix[2] = key_in_blocks[4:8].copy()
     #prepare nonce
-    if(len(nonce) !=12):
+    if(len(nonce) !=24): #24 because saved as hex 1 bytes = 2 hex letters
         print("Nonce length error")
         return "Nonce length error"
+    nonce = bytes.fromhex(nonce)
     nonce_in_parts = [nonce[i:i+4] for i in range(0, len(nonce), 4)]
     nonce_in_blocks=[]
     for p in nonce_in_parts:
@@ -144,6 +145,9 @@ def create_matrix(key,nonce,counter):
     print("Initial matrix:")
     print(initial_matrix)
     return initial_matrix
+# create random nonce and present it in hex format
+def create_random_nonce():
+    return os.urandom(12).hex()
 
 def test_matrix_from_RFC():
     initial_matrix = [[0 for _ in range(4)] for _ in range(4)]
@@ -217,8 +221,9 @@ def chacha20_decrypt(cipertext_bytes, key, nonce):
 
 with open("./test.txt", "rb") as f:
     plaintext_bytes = f.read()
-    cipertext = chacha20_encrypt(plaintext_bytes, '12345678912345678912345678912312',"alaiolamakot")
+    nnonnce = create_random_nonce()
+    cipertext = chacha20_encrypt(plaintext_bytes, '12345678912345678912345678912312',nnonnce)
     with open("./test.enc", "wb") as f:
       f.write(cipertext)
-    decrypted = chacha20_decrypt(cipertext, '12345678912345678912345678912312',"alaiolamakot")
+    decrypted = chacha20_decrypt(cipertext, '12345678912345678912345678912312',nnonnce)
     print(decrypted)

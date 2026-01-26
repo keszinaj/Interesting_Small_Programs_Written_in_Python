@@ -1,9 +1,9 @@
 import hashlib
+
 # TODO: kod dziala ale trzeba go posprzatac i dodac komentarze
 # define full secret
-secret="alamakota"
-secret_as_numer=''.join(str(x) for x in list(map(lambda x: ord(x), list(secret))))
 
+# global configuration 
 #define minimal number of shared secrets nessesary to put
 
 m=2
@@ -14,6 +14,12 @@ degree = m-1
 # secrets to genereate(must be bigger or equal m)
 
 ss = 5
+
+
+secret="alamakota"
+secret_as_numer=''.join(str(x) for x in list(map(lambda x: ord(x), list(secret))))
+
+
 
 # generate random polynomial
 # f(0) = secret
@@ -145,6 +151,9 @@ for _ in range(degree+1):
 
 ta = lagrange_polynomial(xxx, yyy)
 print(determining_an(ta, xxx))
+
+#key format of the chacha20 will be
+# n $ nonce $ x_coordinate $ y_coordinate
 
 
 # Math thoughts

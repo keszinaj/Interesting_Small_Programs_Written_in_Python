@@ -1,15 +1,13 @@
 import argparse
-import argparse
+import os
 
 def encrypt(args):
     print("Encrypting...")
-    print(f"Input: {args.input}")
-    print(f"Output: {args.output}")
-    print(f"Key: {args.key}")
+    
 
 def decrypt(args):
     print("Decrypting...")
-    print(f"File to decrypt: {args.file}")
+    print("File to decrypt: {args.file}")
     keys = []
     n=10
     i=1
