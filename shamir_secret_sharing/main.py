@@ -25,26 +25,35 @@ def encrypt(args):
         print("Point:", point)
     shared_keys = []
     for i in range(n):
-        shared_key = f"c20s{k}${nonce}${xxx[i]}${yyy[i]}"
+        shared_key = f"c20s${k}${nonce}${xxx[i]}${yyy[i]}"
         shared_keys.append(shared_key)
     print("Shared keys:")
     for sk in shared_keys:
         print(sk)
+    print(a)
 
 def decrypt(args):
     print("Decrypting...")
     print("File to decrypt: {args.file}")
+    print("Provided secret keys: {args.secretkeys}")
     keys = []
-    n=10
+    n=int(args.secretkeys)
+    k = 0 # number of shares needed to recreate the secret
     i=1
-    while i<n:
+    xxx=[]
+    yyy=[]
+    nonce=""
+    for i in range(n):
         key = input(f"Enter key #{i}: ")
-        if i == 1:
-            n_str = key.split("$")[0]
-            n = int(n_str) + 2
-        keys.append(key)
-        i+=1
-    print(f"Using keys: {keys}")
+        if i == 0:
+            k = key.split("$")[1]
+            nonce = key.split("$")[2]
+        xxx.append(int(key.split("$")[3]))
+        yyy.append(int(key.split("$")[4]))
+    print(xxx)
+    print(yyy)
+    ta = shamir_secret_sharing.lagrange_polynomial(xxx, yyy)
+    print(shamir_secret_sharing.determining_an(ta, xxx))
 
 
 if __name__ == "__main__":
@@ -89,6 +98,12 @@ if __name__ == "__main__":
         type=str,
         required=True,
         help="Path to the file that you want to decrypt"
+    )
+    decrypt_parser.add_argument(
+        "--secretkeys",
+        type=str,
+        required=True,
+        help="Number of secrets you want to provide for decryption"
     )
     decrypt_parser.set_defaults(func=decrypt)
 
