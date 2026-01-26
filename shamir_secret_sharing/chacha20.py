@@ -131,8 +131,7 @@ def create_matrix(key,nonce,counter):
     nonce_in_parts = [nonce[i:i+4] for i in range(0, len(nonce), 4)]
     nonce_in_blocks=[]
     for p in nonce_in_parts:
-        b = p.encode("ascii")
-        n = int.from_bytes(b, "little")
+        n = int.from_bytes(p, "little")
         print(hex(n))
         nonce_in_blocks.append(n)
     print("Nonce ", nonce_in_blocks)
