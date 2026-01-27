@@ -8,6 +8,7 @@ def encrypt(args):
     print(f"File to encrypt: {args.file}")
     print(f"Number of shares to generate: {args.shares}")
     print(f"Threshold number of shares needed to recreate the secret: {args.threshold}")
+    file = args.file
     nonce = chacha20.create_random_nonce()
     k = args.threshold # number of shares needed to recreate the secret
     n = args.shares    # number of shares to generate
@@ -31,6 +32,14 @@ def encrypt(args):
     for sk in shared_keys:
         print(sk)
     print(a)
+    with open("./test.txt", "rb") as f:
+        plaintext_bytes = f.read()
+        cipertext = chacha20.chacha20_encrypt(plaintext_bytes,secret_key , nonce)
+        file += '.enc'
+        with open(file, "wb") as f:
+            f.write(cipertext)
+    print("file encrypted")
+        
 
 def decrypt(args):
     print("Decrypting...")
