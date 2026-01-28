@@ -70,32 +70,32 @@ def chacha20_keystream_chunk(initial_state_matrix):
     #jak mnie python zrobil
     #matrix = initial_state_matrix.copy()
     matrix = [row[:] for row in initial_state_matrix]
-    for row in initial_state_matrix:
-        for word in row:
-            print(hex(word), end=' ')
-        print("KONIEC")
+    #for row in initial_state_matrix:
+    #    for word in row:
+    #        print(hex(word), end=' ')
+    #    print("KONIEC")
     for i in range(1,21):
         if i % 2 == 0:
             chacha20_diagonal_operations(matrix)
         else:
             chacha20_columns_operations(matrix)
-    for row in matrix:
-        for word in row:
-            print(hex(word), end=' ')
-        print() 
+    #for row in matrix:
+     #   for word in row:
+      #      print(hex(word), end=' ')
+       # print() 
     for i in range(4):
         for j in range(4):
             matrix[i][j] = add32(matrix[i][j], initial_state_matrix[i][j])
-    for row in matrix:
-        for word in row:
-            print(hex(word), end=' ')
-        print()
+    #for row in matrix:
+        #for word in row:
+           # print(hex(word), end=' ')
+        #print()
     keystream = b"".join( word.to_bytes(4, "little")
                          for row in matrix
                          for word in row)
-    print("Keystream block:")
-    print(keystream.hex())
-    print(len(keystream))
+    #print("Keystream block:")
+    #print(keystream.hex())
+    #print(len(keystream))
       
     return keystream
 '''
@@ -107,7 +107,7 @@ def create_matrix(key,nonce,counter):
     initial_matrix = [[0 for _ in range(4)] for _ in range(4)]
     # const is sentence "expand 32-byte k" in little endian
     constants = [ 0x61707865, 0x3320646e, 0x79622d32, 0x6b206574 ]
-    print(constants)
+    #print(constants)
     initial_matrix[0] = constants.copy()
     # prapere key words
     if(len(key) !=32):
@@ -118,9 +118,9 @@ def create_matrix(key,nonce,counter):
     for k in key_in_parts:
         b = k.encode("ascii")
         n = int.from_bytes(b, "little")
-        print(hex(n))
+        #print(hex(n))
         key_in_blocks.append(n)
-    print(key_in_blocks)
+    #print(key_in_blocks)
     initial_matrix[1] = key_in_blocks[0:4].copy()
     initial_matrix[2] = key_in_blocks[4:8].copy()
     #prepare nonce
@@ -132,17 +132,17 @@ def create_matrix(key,nonce,counter):
     nonce_in_blocks=[]
     for p in nonce_in_parts:
         n = int.from_bytes(p, "little")
-        print(hex(n))
+        #print(hex(n))
         nonce_in_blocks.append(n)
-    print("Nonce ", nonce_in_blocks)
+    #print("Nonce ", nonce_in_blocks)
     initial_matrix[3][1:] = nonce_in_blocks.copy()    
     #prapare counter
     f_counter = counter.to_bytes(4, byteorder="little")
     f_counter = int.from_bytes(f_counter, "little")
     initial_matrix[3][0] = f_counter
-    print(hex(f_counter))
-    print("Initial matrix:")
-    print(initial_matrix)
+    #print(hex(f_counter))
+    #print("Initial matrix:")
+   # print(initial_matrix)
     return initial_matrix
 # create random nonce and present it in hex format
 def create_random_nonce():
@@ -156,7 +156,7 @@ def test_matrix_from_RFC():
         for i in range(0, 32, 4)
     ]
     constants = [ 0x61707865, 0x3320646e, 0x79622d32, 0x6b206574 ]
-    print(constants)
+    #print(constants)
     nonce = bytes.fromhex('000000090000004a00000000')
     nonce_in_blocks = [
         int.from_bytes(nonce[i:i+4], "little")
@@ -170,17 +170,17 @@ def test_matrix_from_RFC():
     f_counter = counter.to_bytes(4, byteorder="little")
     f_counter = int.from_bytes(f_counter, "little")
     initial_matrix[3][0] = f_counter
-    print("Initial matrix:", initial_matrix)
-    for row in initial_matrix:
-        for word in row:
-            print(hex(word), end=' ')
-        print()
+    #print("Initial matrix:", initial_matrix)
+    #for row in initial_matrix:
+    #    for word in row:
+    #        print(hex(word), end=' ')
+   #     print()
     return initial_matrix
     #for i in key_words:
     #    print(hex(i))
 
-mmm = test_matrix_from_RFC()
-chacha20_keystream_chunk(mmm)
+#mmm = test_matrix_from_RFC()
+#chacha20_keystream_chunk(mmm)
 '''dobrze wychodzi
    ChaCha state after 20 rounds
 
@@ -203,7 +203,7 @@ chacha20_keystream_chunk(mmm)
 
 def chacha20_encrypt(plaintext_bytes, key, nonce):
     data_length = len(plaintext_bytes)
-    print()
+    #print()
     chunk_size = 64
     num_of_chunks = (data_length + 63) // 64 
     chunks = [ plaintext_bytes[i:i+chunk_size] for i in range(0, num_of_chunks*chunk_size, chunk_size)]
@@ -218,11 +218,11 @@ def chacha20_decrypt(cipertext_bytes, key, nonce):
     return chacha20_encrypt(cipertext_bytes, key, nonce) # symmetric cipher
 
 
-with open("./test.txt", "rb") as f:
-    plaintext_bytes = f.read()
-    nnonnce = create_random_nonce()
-    cipertext = chacha20_encrypt(plaintext_bytes, '12345678912345678912345678912312',nnonnce)
-    with open("./test.enc", "wb") as f:
-      f.write(cipertext)
-    decrypted = chacha20_decrypt(cipertext, '12345678912345678912345678912312',nnonnce)
-    print(decrypted)
+#with open("./test.txt", "rb") as f:
+#    plaintext_bytes = f.read()
+#    nnonnce = create_random_nonce()
+#    cipertext = chacha20_encrypt(plaintext_bytes, '12345678912345678912345678912312',nnonnce)
+#    with open("./test.enc", "wb") as f:
+#      f.write(cipertext)
+#    decrypted = chacha20_decrypt(cipertext, '12345678912345678912345678912312',nnonnce)
+#    print(decrypted)

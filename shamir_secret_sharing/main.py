@@ -38,7 +38,7 @@ def encrypt(args):
         file += '.enc'
         with open(file, "wb") as f:
             f.write(cipertext)
-    print("file encrypted")
+    print("file encrypted!")
         
 
 def decrypt(args):
@@ -62,7 +62,20 @@ def decrypt(args):
     print(xxx)
     print(yyy)
     ta = shamir_secret_sharing.lagrange_polynomial(xxx, yyy)
-    print(shamir_secret_sharing.determining_an(ta, xxx))
+    an = shamir_secret_sharing.determining_an(ta, xxx)
+    print("an")
+    secret_key = "".join(str(i) for i in an)
+    #to meke it 32 bytes as chacha20 require
+    res = hashlib.md5(secret_key.encode())
+    secret_key=res.hexdigest()
+    with open("./test.enc", "rb") as f:
+        encypted_bytes = f.read()
+        plaintext= chacha20.chacha20_decrypt(encypted_bytes,secret_key , nonce)
+        file += '.enc'
+        with open(file, "wb") as f:
+            f.write(plaintext)
+    print("file decrypted")
+
 
 
 if __name__ == "__main__":

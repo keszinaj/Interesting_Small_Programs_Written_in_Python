@@ -94,6 +94,7 @@ def determining_an(a, x):
         for o in range(len(temp_sol)):
             arr[o] += temp_sol[o] *a[i+1]
         #print(arr)
+    arr = [int(num) for num in arr]
     return(arr)    
 
 
