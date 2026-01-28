@@ -52,26 +52,29 @@ def decrypt(args):
     xxx=[]
     yyy=[]
     nonce=""
+    k=0
     for i in range(n):
         key = input(f"Enter key #{i}: ")
         if i == 0:
-            k = key.split("$")[1]
+            k = int(key.split("$")[1])
             nonce = key.split("$")[2]
         xxx.append(int(key.split("$")[3]))
         yyy.append(int(key.split("$")[4]))
+    uxxx=xxx[:k]
+    uyyy=yyy[:k]
     print(xxx)
     print(yyy)
-    ta = shamir_secret_sharing.lagrange_polynomial(xxx, yyy)
-    an = shamir_secret_sharing.determining_an(ta, xxx)
-    print("an")
+    ta = shamir_secret_sharing.lagrange_polynomial(uxxx, uyyy)
+    an = shamir_secret_sharing.determining_an(ta, uxxx)
+    print(an)
     secret_key = "".join(str(i) for i in an)
     #to meke it 32 bytes as chacha20 require
     res = hashlib.md5(secret_key.encode())
     secret_key=res.hexdigest()
-    with open("./test.enc", "rb") as f:
+    file = args.file
+    with open("./test.txt.enc", "rb") as f:
         encypted_bytes = f.read()
         plaintext= chacha20.chacha20_decrypt(encypted_bytes,secret_key , nonce)
-        file += '.enc'
         with open(file, "wb") as f:
             f.write(plaintext)
     print("file decrypted")

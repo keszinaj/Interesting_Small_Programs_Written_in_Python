@@ -94,15 +94,17 @@ def determining_an(a, x):
         for o in range(len(temp_sol)):
             arr[o] += temp_sol[o] *a[i+1]
         #print(arr)
+    print(arr)
     arr = [int(num) for num in arr]
+    print(arr)
     return(arr)    
 
 
 #test determining_an()
 #determining_an([1, 1, 1], [1, 2,100])
 #determining_an([1, 1, 1, 1], [1, 2, 3, 4])
-#determining_an([4, 5, 1], [1, 2, 3])
-
+#ogh=determining_an([4, 5, 1], [1, 2, 3])
+#print('ogh', ogh)
 # no niby dziala ale to trzeba jeszcze chyba wiecej przykladow porobic do testow
 # no i to wszystko trzeba teraz polaczyc
 
@@ -150,8 +152,8 @@ for _ in range(degree+1):
 
 
 
-ta = lagrange_polynomial(xxx, yyy)
-print(determining_an(ta, xxx))
+#ta = lagrange_polynomial([9262, 8210, 8293], [90569871, 80283415, 81094989])
+#print(determining_an(ta, xxx))
 
 #key format of the chacha20 will be
 # n $ nonce $ x_coordinate $ y_coordinate
