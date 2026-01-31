@@ -8,7 +8,9 @@
 from importlib.resources import path
 import os
 
+# 32 bit mask and operations
 MASK32 = 0xffffffff
+
 def add32(a, b):
     return (a + b) & MASK32
 def rotl32(a, n):
@@ -20,10 +22,6 @@ def chacha20_one_operation_abcd(a,b,c,d):
     a = add32(a, b); d ^= a; d = rotl32(d,  8)
     c = add32(c, d); b ^= c; b = rotl32(b,  7)
     return a, b, c, d
-
-
-
-
 
 # In chacha20 there are 20 rounds,
 # on odd rounds we do operations on columns
@@ -53,62 +51,53 @@ def chacha20_diagonal_operations(matrix):
         matrix[3][(3+i)%4] = d
         
 def chacha20_keystream_chunk(initial_state_matrix):
-    #jak mnie python zrobil
-    #matrix = initial_state_matrix.copy()
     matrix = [row[:] for row in initial_state_matrix]
-    #for row in initial_state_matrix:
-    #    for word in row:
-    #        print(hex(word), end=' ')
-    #    print("KONIEC")
     for i in range(1,21):
         if i % 2 == 0:
             chacha20_diagonal_operations(matrix)
         else:
             chacha20_columns_operations(matrix)
-    #for row in matrix:
-     #   for word in row:
-      #      print(hex(word), end=' ')
-       # print() 
     for i in range(4):
         for j in range(4):
             matrix[i][j] = add32(matrix[i][j], initial_state_matrix[i][j])
-    #for row in matrix:
-    #    for word in row:
-    #        print(hex(word), end=' ')
-    #    print()
     keystream = b"".join( word.to_bytes(4, "little")
                          for row in matrix
                          for word in row)
-    #print("Keystream block:")
-    #print(keystream.hex())
-    #print(len(keystream))
-      
     return keystream
-'''
-key has to be 32 bytes long == 32 letters, it has to be in string format
-nonce has to be 12 bytes long == 12 letters, it has to be in string format
-counter is integer
-'''
-def create_matrix(key,nonce,counter):
+
+# Create initial matrix from key, nonce and counter
+# Maybe code is not the cleaniest but it creates standard matrix per chacha20 definition
+# The matrix should look like this:
+#       cccccccc  cccccccc  cccccccc  cccccccc
+#       kkkkkkkk  kkkkkkkk  kkkkkkkk  kkkkkkkk
+#       kkkkkkkk  kkkkkkkk  kkkkkkkk  kkkkkkkk
+#       bbbbbbbb  nnnnnnnn  nnnnnnnn  nnnnnnnn
+#  c - constant words
+#  k - key words
+#  b - block counter
+#  n - nonce words
+# 32 bit mask and operations
+# nonce has to be 12 bytes long == 12 letters, it has to be in string format
+# counter is integer
+def create_matrix(key, nonce, counter):
     initial_matrix = [[0 for _ in range(4)] for _ in range(4)]
     # const is sentence "expand 32-byte k" in little endian
     constants = [ 0x61707865, 0x3320646e, 0x79622d32, 0x6b206574 ]
-    #print(constants)
     initial_matrix[0] = constants.copy()
+
     # prapere key words
-    if(len(key) !=32):
-        print("Key length error")
-        return "Key length error"
+    #if(len(key) !=32):
+    #    print("Key length error")
+    #    return "Key length error"
     key_in_parts = [key[i:i+4] for i in range(0, len(key), 4)]
     key_in_blocks=[]
     for k in key_in_parts:
         b = k.encode("ascii")
         n = int.from_bytes(b, "little")
-        #print(hex(n))
         key_in_blocks.append(n)
-    #print(key_in_blocks)
     initial_matrix[1] = key_in_blocks[0:4].copy()
     initial_matrix[2] = key_in_blocks[4:8].copy()
+
     #prepare nonce
     if(len(nonce) !=24): #24 because saved as hex 1 bytes = 2 hex letters
         print("Nonce length error")
@@ -118,37 +107,29 @@ def create_matrix(key,nonce,counter):
     nonce_in_blocks=[]
     for p in nonce_in_parts:
         n = int.from_bytes(p, "little")
-        #print(hex(n))
         nonce_in_blocks.append(n)
-    #print("Nonce ", nonce_in_blocks)
-    initial_matrix[3][1:] = nonce_in_blocks.copy()    
+    initial_matrix[3][1:] = nonce_in_blocks.copy()   
+
     #prapare counter
     f_counter = counter.to_bytes(4, byteorder="little")
     f_counter = int.from_bytes(f_counter, "little")
     initial_matrix[3][0] = f_counter
-    #print(hex(f_counter))
-    #print("Initial matrix:")
-   # print(initial_matrix)
     return initial_matrix
+
 # create random nonce and present it in hex format
 def create_random_nonce():
     return os.urandom(12).hex()
 
-
-
-
-
-
+# main encryption function
 def chacha20_encrypt(plaintext_bytes, key, nonce):
     data_length = len(plaintext_bytes)
-    #print()
     chunk_size = 64
     num_of_chunks = (data_length + 63) // 64 
     chunks = [ plaintext_bytes[i:i+chunk_size] for i in range(0, num_of_chunks*chunk_size, chunk_size)]
     cipertext = b""
     for i in range(num_of_chunks):
         keystream = chacha20_keystream_chunk(create_matrix(key, nonce, i+1))
-        cipertext_chunk = bytes(b ^ k for b, k in zip(chunks[i], keystream)) # we can't xor on bytes, it will create pair of bytes and xor on it(xor on two numbers)
+        cipertext_chunk = bytes(b ^ k for b, k in zip(chunks[i], keystream)) 
         cipertext += cipertext_chunk
     return cipertext
 
