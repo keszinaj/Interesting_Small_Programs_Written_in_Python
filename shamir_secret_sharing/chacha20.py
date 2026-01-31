@@ -20,23 +20,9 @@ def chacha20_one_operation_abcd(a,b,c,d):
     a = add32(a, b); d ^= a; d = rotl32(d,  8)
     c = add32(c, d); b ^= c; b = rotl32(b,  7)
     return a, b, c, d
-#test vector
-'''
-a = 0x11111111
-b = 0x01020304
-c = 0x9b8d6f43
-d = 0x01234567
-for x in chacha20_one_operation_abcd(a,b,c,d):
-    print(hex(x))
-print("----")
-'''
 
-#it should return:
-#a = 0xea2a92f4
-#b = 0xcb1cf8ce
-#c = 0x4581472e
-#d = 0x5881c4bb
-# test is passing
+
+
 
 
 # In chacha20 there are 20 rounds,
@@ -148,55 +134,7 @@ def create_matrix(key,nonce,counter):
 def create_random_nonce():
     return os.urandom(12).hex()
 
-def test_matrix_from_RFC():
-    initial_matrix = [[0 for _ in range(4)] for _ in range(4)]
-    key_bytes = bytes.fromhex('000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f')
-    key_words = [
-        int.from_bytes(key_bytes[i:i+4], "little")
-        for i in range(0, 32, 4)
-    ]
-    constants = [ 0x61707865, 0x3320646e, 0x79622d32, 0x6b206574 ]
-    #print(constants)
-    nonce = bytes.fromhex('000000090000004a00000000')
-    nonce_in_blocks = [
-        int.from_bytes(nonce[i:i+4], "little")
-        for i in range(0, len(nonce), 4)
-    ]
-    initial_matrix[0] = constants.copy()
-    initial_matrix[1] = key_words[0:4].copy()
-    initial_matrix[2] = key_words[4:8].copy()
-    initial_matrix[3][1:] = nonce_in_blocks.copy() 
-    counter = 1 
-    f_counter = counter.to_bytes(4, byteorder="little")
-    f_counter = int.from_bytes(f_counter, "little")
-    initial_matrix[3][0] = f_counter
-    #print("Initial matrix:", initial_matrix)
-    #for row in initial_matrix:
-    #    for word in row:
-    #        print(hex(word), end=' ')
-   #     print()
-    return initial_matrix
-    #for i in key_words:
-    #    print(hex(i))
 
-#mmm = test_matrix_from_RFC()
-#chacha20_keystream_chunk(mmm)
-'''dobrze wychodzi
-   ChaCha state after 20 rounds
-
-       837778ab  e238d763  a67ae21e  5950bb2f
-       c4f2d0c7  fc62bb2f  8fa018fc  3f5ec7b7
-       335271c2  f29489f3  eabda8fc  82e46ebd
-       d19c12b4  b04e16de  9e83d0cb  4e3c50a2
-
-          ChaCha state at the end of the ChaCha20 operation
-
-       e4e7f110  15593bd1  1fdd0f50  c47120a3
-       c7f4d1c7  0368c033  9aaa2204  4e6cd4c3
-       466482d2  09aa9f07  05d7c214  a2028bd9
-       d19c12b5  b94e16de  e883d0cb  4e3c50a2
-
-'''
 
 
 
@@ -217,12 +155,3 @@ def chacha20_encrypt(plaintext_bytes, key, nonce):
 def chacha20_decrypt(cipertext_bytes, key, nonce):
     return chacha20_encrypt(cipertext_bytes, key, nonce) # symmetric cipher
 
-
-#with open("./test.txt", "rb") as f:
-#    plaintext_bytes = f.read()
-#    nnonnce = create_random_nonce()
-#    cipertext = chacha20_encrypt(plaintext_bytes, '12345678912345678912345678912312',nnonnce)
-#    with open("./test.enc", "wb") as f:
-#      f.write(cipertext)
-#    decrypted = chacha20_decrypt(cipertext, '12345678912345678912345678912312',nnonnce)
-#    print(decrypted)
