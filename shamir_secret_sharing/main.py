@@ -32,7 +32,7 @@ def encrypt(args):
     for sk in shared_keys:
         print(sk)
     print(a)
-    with open("./test.txt", "rb") as f:
+    with open(file, "rb") as f:
         plaintext_bytes = f.read()
         cipertext = chacha20.chacha20_encrypt(plaintext_bytes,secret_key , nonce)
         file += '.enc'
@@ -72,9 +72,10 @@ def decrypt(args):
     res = hashlib.md5(secret_key.encode())
     secret_key=res.hexdigest()
     file = args.file
-    with open("./test.txt.enc", "rb") as f:
+    with open(file, "rb") as f:
         encypted_bytes = f.read()
         plaintext= chacha20.chacha20_decrypt(encypted_bytes,secret_key , nonce)
+        file = file.replace(".enc", ".dec")
         with open(file, "wb") as f:
             f.write(plaintext)
     print("file decrypted")
