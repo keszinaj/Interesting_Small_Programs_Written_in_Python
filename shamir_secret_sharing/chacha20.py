@@ -73,9 +73,9 @@ def chacha20_keystream_chunk(initial_state_matrix):
         for j in range(4):
             matrix[i][j] = add32(matrix[i][j], initial_state_matrix[i][j])
     #for row in matrix:
-        #for word in row:
-           # print(hex(word), end=' ')
-        #print()
+    #    for word in row:
+    #        print(hex(word), end=' ')
+    #    print()
     keystream = b"".join( word.to_bytes(4, "little")
                          for row in matrix
                          for word in row)
